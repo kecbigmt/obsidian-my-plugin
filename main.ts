@@ -8,6 +8,7 @@ import {
   PluginSettingTab,
   Setting,
 } from "obsidian";
+import { ExampleView, VIEW_TYPE_EXAMPLE } from "./ExampleView";
 
 // Remember to rename these classes and interfaces!
 
@@ -25,6 +26,8 @@ export default class MyPlugin extends Plugin {
   async onload() {
     await this.loadSettings();
 
+    this.registerView(VIEW_TYPE_EXAMPLE, (leaf) => new ExampleView(leaf));
+
     // This creates an icon in the left ribbon.
     const ribbonIconEl = this.addRibbonIcon(
       "dice",
@@ -32,6 +35,8 @@ export default class MyPlugin extends Plugin {
       (evt: MouseEvent) => {
         // Called when the user clicks the icon.
         new Notice("This is a notice!");
+
+        this.activateView();
       },
     );
     // Perform additional things with the ribbon
@@ -102,6 +107,20 @@ export default class MyPlugin extends Plugin {
 
   async saveSettings() {
     await this.saveData(this.settings);
+  }
+
+  async activateView() {
+    const getLeaf = async () => {
+      const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE_EXAMPLE);
+      if (leaves.length > 0) return leaves[0];
+
+      const leaf = this.app.workspace.getRightLeaf(false);
+      if (!leaf) throw new Error("No leaf found");
+      await leaf.setViewState({ type: VIEW_TYPE_EXAMPLE, active: true });
+      return leaf;
+    };
+
+    this.app.workspace.revealLeaf(await getLeaf());
   }
 }
 
