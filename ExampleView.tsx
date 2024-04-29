@@ -2,6 +2,8 @@ import { ItemView, WorkspaceLeaf } from "obsidian";
 import { StrictMode, useState } from "react";
 import { Root, createRoot } from "react-dom/client";
 
+import { AppContext, useApp } from "./hooks";
+
 export const VIEW_TYPE_EXAMPLE = "example-view";
 
 export class ExampleView extends ItemView {
@@ -25,7 +27,9 @@ export class ExampleView extends ItemView {
     this.root = createRoot(container);
     this.root.render(
       <StrictMode>
-        <ReactView />
+        <AppContext.Provider value={this.app}>
+          <ReactView />
+        </AppContext.Provider>
       </StrictMode>,
     );
   }
@@ -37,9 +41,10 @@ export class ExampleView extends ItemView {
 
 const ReactView = () => {
   const [count, setCount] = useState(0);
+  const { vault } = useApp();
   return (
     <div>
-      <h4>Hello, React!</h4>
+      <h4>{vault.getName()}</h4>
       <p>Count: {count}</p>
       <button
         onClick={() => {
